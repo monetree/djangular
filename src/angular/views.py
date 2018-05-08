@@ -61,12 +61,7 @@ def sweet(request):
 
 
 def request(request):
-    if request.is_ajax():
-        return HttpResponse('This is Ajax')
-    else:
-        return HttpResponse('This is not Ajax')
-
-    return render(request,"request.html")
+    return render(request,"response.htm")
 
 
 
