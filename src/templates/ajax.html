@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Djangular App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.0/jquery-confirm.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.0/jquery-confirm.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<style media="screen">
+
+</style>
+</head>
+<body ng-app="myApp" ng-controller="myCtrl">
+<div class="container">
+
+  <div class="row">
+  <div class="col-sm-4"></div>
+  <div class="col-sm-4">
+
+      <input type="text" ng-model="name" name="name" class="form-control" placeholder="enter name">
+      <input type="text" ng-model="number" name="number" class="form-control" value="" placeholder="enter email">
+      <button class="btn btn-sm btn-danger" type="submit" name="submit" ng-click="submitForm()">submit</button>
+
+  </div>
+  </div>
+
+  <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Slno</th>
+          <th>id</th>
+          <th>Name</th>
+          <th>Number</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="d in data">
+          <td>{$ $index + 1 $}</td>
+          <td>{$ d.id $}</td>
+          <td>{$ d.name $}</td>
+          <td>{$ d.number $}</td>
+          <td>
+            <button class="btn btn-info btn-sm" ng-click="update(d.id)" data-toggle="modal" data-target="#myModal">update</button>
+            <button class="btn btn-danger btn-sm" ng-click="delete(d.id)">delete</button>
+          </td>
+        </tr>
+      <tbody>
+  </table>
+
+</div>
+
+<div class="modal fade" id="myModal" role="dialog">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="form-group">
+          <input type="text" ng-model="updateName" ng-value="dict.name" name="updateName" class="form-control"></div>
+        <div class="form-group">
+          <input type="text" ng-model="updateNumber" ng-value="dict.number" name="updateNumber" class="form-control"></div>
+        <div class="form-group">
+          <button type="button" name="update" class="btn btn-danger" ng-click="updateNow(dict.id,dict.name,dict.number)" name="button">Update</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl',function($scope,$http){
+  
+  $scope.records = function(){
+    $http.get("/api/")
+    .then(function(response){
+      $scope.data = response.data;
+    }, function(response) {
+      console.log('SomeThing went wrong !');
+    });
+  }
+  $scope.records();
+
+
+  $scope.delete = function(id){
+    context = {
+      "id" : id
+    }
+    $http.post("/delete/Angular/2/",context)
+    .then(function(response){
+      $scope.records();
+        $.alert({
+          title: 'Deleted Successfully !!',
+        });
+    });
+  }
+
+
+
+  $scope.update = function(id){
+    context = {
+      "id" : id
+    }
+    $http.post("/update/data/",context)
+    .then(function(response){
+    $scope.dict = response.data;
+    console.log($scope.dict);
+    },function(response){
+      console.log('SomeThing went wrong !');
+    });
+  }
+
+
+  $scope.updateNow = function(id,name,no){
+    uname = $scope.updateName;
+    uno = $scope.updateNumber;
+
+    if (uname==undefined){
+    var uname=name;
+    }
+
+    if (uno==undefined){
+    var uno=no;
+    }
+
+    context = {
+      "id":id,
+      "name":uname,
+      "number":uno,
+    }
+
+    $http.post("/update/now/",context)
+    .then(function(response){
+      $scope.records();
+      console.log(id);
+      console.log(name);
+      console.log(no);
+      },function(response){
+      console.log('SomeThing went wrong !');
+    });
+  }
+
+
+  $scope.submitForm = function(){
+    context = {
+      "name" : $scope.name,
+      "number" : $scope.number,
+    }
+    $http.post("/angular/",context)
+    .then(function(response){
+      $scope.records();
+      swal("Form Submitted successfully !!", {
+      buttons: false,
+      timer: 1000,
+      });
+    },function(response){
+      console.log('SomeThing went wrong !');
+    });
+  }
+});
+
+app.config(['$httpProvider', function($httpProvider) {
+    $httpProvider.defaults.xsrfCookieName = 'csrftoken';
+    $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
+}]);
+
+app.config(function($interpolateProvider) {
+    $interpolateProvider.startSymbol('{$').endSymbol('$}');
+});
+</script>
+</body>
+</html>
